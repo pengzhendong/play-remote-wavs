@@ -1,23 +1,41 @@
-if ($args.Count -lt 2) {
-  echo "Usage: .\play.ps1 [user@]host:<wavs_dir> <wavlist> [start_index]"
+if ($args.Count -lt 1) {
+  echo "Usage: .\play.ps1 [user@]host:<wav_list> [start_index]"
   exit
 }
 
-[string[]]$wavs = Get-Content -Path $args[1]
 $i = 0
-if ($args[2]) {
-  $i = $args[2]
+if ($args[1]) {
+  $i = $args[1]
 }
 
+$hostname = $args[0] -replace ":(.*)", ""
+scp $args[0] wav.lst
+[string[]]$wavs = Get-Content -Path wav.lst
 while ($i -lt $wavs.length) {
-  $wav = $wavs[$i]
-  .\pscp.exe -scp $($args[0] + "/" + $wav) .
-  .\sox.exe $wav -d
-  rm $wav
+  $wav = "audio.wav"
+  if (Test-Path $wav) {
+    Remove-Item $wav
+  }
+  [string[]]$array = $wavs[$i] -Split " "
+  scp ${hostname}:$($array[0]) $wav
   echo "=================================================================="
-  echo "Played ($($i + 1)/$($wavs.length))): $wav."
+  echo "($($i + 1)/$($wavs.length)): $($array[0])"
+  if ($array.length -eq 1) {
+    echo "=================================================================="
+    .\sox.exe $wav -d
+  } elseif ($array.length -eq 2) {
+    echo $($array[1])
+    echo "=================================================================="
+    .\sox.exe $wav -d
+  } elseif ($array.length -eq 3) {
+    echo "=================================================================="
+    .\sox.exe $wav -d trim $($array[1]) $($array[2])
+  } elseif ($array.length -eq 4) {
+    echo $($array[3])
+    echo "=================================================================="
+    .\sox.exe $wav -d trim $($array[1]) $($array[2])
+  }
   echo "Press [r]eplay [n]ext [p]revious [q]uit"
-  echo "=================================================================="
   $key = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown').Character
   if ($key -eq 'q') {
     exit
@@ -25,13 +43,13 @@ while ($i -lt $wavs.length) {
     $i++
     if ($i -ge $wavs.length) {
       $i = $wavs.length - 1
-      echo "=======================Reached end of list.======================="
+      echo "!!!!Reached end of list!!!!"
     }
   } elseif ($key -eq 'p') {
     $i--
     if ($i -lt 0) {
       $i = 0
-      echo "====================Reached beginning of list.===================="
+      echo "!!!!Reached beginning of list!!!!"
     }
   } elseif ($key -ne 'r') {
     echo "Unknown key: $key"
