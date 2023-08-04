@@ -2,43 +2,26 @@
 
 ## Usage
 
-```
-[/path/to/wav]
-[/path/to/wav] [transcript]
-[/path/to/wav] [start] [duration]
-[/path/to/wav] [start] [duration] [transcript]
-```
-
 ``` bash
-$ ssh username@192.168.1.3
-$ chmod 700 ~/.ssh
-$ chmod 600 ~/.ssh/authorized_keys
+$ cat wav.lst
+
+http://ip:port/path/to/wav
+http://ip:port/path/to/wav [transcript]
+http://ip:port/path/to/wav [start] [duration]
+http://ip:port/path/to/wav [start] [duration] [transcript]
 ```
 
 ### Windows
 
-管理员身份打开 powershell
+以管理员权限打开 powershell
 
 ``` bash
 $ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-$ ssh-keygen
-$ type $env:USERPROFILE\.ssh\id_rsa.pub | ssh username@192.168.1.3 "cat >> .ssh/authorized_keys"
-```
-
-``` bash
-$ .\play.ps1 --help
-Usage: .\play.ps1 [user@]host:<wav_list> [start_index]
-
-$ .\play.ps1 username@192.168.1.3:/path/to/wav.lst 23
+$ .\play.ps1 http://ip:port/wav.lst [start_id]
 ```
 
 ### Linux & MacOS
 
 ``` bash
-$ ssh-keygen
-$ ssh-copy-id -i ~/.ssh/id_rsa.pub username@192.168.1.3
-```
-
-``` bash
-$ bash play.sh username@192.168.1.3:/path/to/wav.lst 23
+$ bash play.sh http://ip:port/wav.lst [start_id]
 ```

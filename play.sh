@@ -1,22 +1,22 @@
 #!/bin/bash
 
 if [ $# -lt 1 ] ; then
-  echo "Usage: ./play.sh [user@]host:<wav_list> [start_index]"
+  echo "Usage: ./play.sh http://ip:port/wav.lst [start_id]"
   exit
 fi
 
 i=0
 if [ $# -eq 2 ] ; then
-  i=$2
+  i=$(($2-1))
 fi
 
-scp $1 wav.lst
+curl $1 -o wav.lst
 IFS=$'\n' read -d '' -r -a wavs < wav.lst
 while [ $i -lt ${#wavs[@]} ] ; do
   IFS=' ' read -r -a array <<< ${wavs[$i]}
   wav="audio.wav"
   [ -e $wav ] && rm $wav
-  scp ${1%:*}:${array[0]} $wav
+  curl ${array[0]} -o $wav
   echo "=================================================================="
   echo "($((i+1))/${#wavs[@]}): ${array[0]}"
   if [ ${#array[@]} -eq 1 ] ; then
